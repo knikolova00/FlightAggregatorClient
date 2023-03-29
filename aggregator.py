@@ -16,7 +16,7 @@ def sort_by_cheapest(flights):
 # Define regular expressions
 
 
-email_regex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'
+email_regex = r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$'
 # Date in format dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy
 date_regex = r'^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$'
 # 16-digit card number
@@ -57,12 +57,43 @@ def search_flights():
             if confirm == 'y':
                 # Send a request to airlines and list available flights
                 print('Available flights:\n')
+                book_flight()
                 break
             else:
                 print('Booking cancelled\n')
                 break
 
 # Manage booking and helper methods
+
+
+def book_flight():
+    print('Booking flight...')
+    first_name = input('First name: ')
+    last_name = input('Last name: ')
+    while True:
+        email = input('Email: ')
+        if not validate_input(email_regex, email):
+            print('Invalid email format. Please try again.')
+        else:
+            phone_num = input('Phone number: ')
+            if not validate_input(phone_num_regex, phone_num):
+                print('Invalid phone number format. Please try again.')
+            else:
+                print('Booking details summary:')
+                print('------------------------')
+                print(f'First name: {first_name}')
+                print(f'Last name: {last_name}')
+                print(f'Email: {email}')
+                print(f'Phone number: {phone_num}')
+                print('------------------------')
+                confirm = input('Confirm? (y/n): \n')
+                if confirm == 'y':
+                    # TODO send booking details to airline api
+                    print('Booking successful!\n')
+                    break
+                else:
+                    print('Booking cancelled\n')
+                    break
 
 
 def change_name():
@@ -83,7 +114,7 @@ def pay_with_klarna():
     print('Klarna payment\n')
 
 
-def pay():
+def process_payment():
     print('Please pick a payment method:\n')
     payment_method = input(
         '1. Card\n2. Klarna\n3. Go back\n4. Exit\nYour choice: ')
@@ -123,18 +154,13 @@ def manage_booking():
                 elif user_choice == '2':
                     cancel_flight()
                 elif user_choice == '3':
-                    pay()
+                    process_payment()
                 elif user_choice == '4':
                     view_booking()
                 elif user_choice == '5':
                     print('\nReturning to main menu...\n')
                     break
             break
-# Proces payment
-
-
-def process_payment():
-    print("Processing payment...")
 
 # Exit function
 
@@ -142,6 +168,7 @@ def process_payment():
 def exit():
     print("Exiting...")
     sys.exit(0)
+
 # Main method
 
 
@@ -156,7 +183,7 @@ def main():
             manage_booking()
         elif user_choice == '3':
             print('\nThank you for using our service!')
-            break
+            exit()
 
 
 main()
