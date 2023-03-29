@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 import re
 
@@ -12,7 +13,7 @@ payment_provider_apis = {}
 def sort_by_cheapest(flights):
     return sorted(flights, key=lambda flight: flight['price'])
 
-# Validate input
+# Define regular expressions
 
 
 email_regex = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'
@@ -27,6 +28,8 @@ phone_num_regex = r'^(\+44|0)?[\s]?\d{1,5}[\s]?\d{1,5}[\s]?\d{1,5}$'
 # 3 uppercase letters followed by 4 digits
 booking_ref_regex = r'^[A-Z]{3}\d{4}$'
 
+# Validate input
+
 
 def validate_input(type, data):
     return re.fullmatch(type, data)
@@ -38,28 +41,107 @@ def search_flights():
     print('Flight search')
     departure_airport = input('Departure airport: ')
     arrival_airport = input('Arrival airport: ')
-    date_and_time = input('Preffered Date and Time: ')
-    print('Summary of choices: ')
-    print(f'Departure airport: {departure_airport}')
-    print(f'Arrival airport: {arrival_airport}')
-    print(f'Date and Time: {date_and_time}')
-    confirm = input('Confirm? (y/n): ')
-    if confirm == 'y':
-        print('Booking flight...')
-    else:
-        print('Booking cancelled')
+    # Continuosly check for valid date
+    while True:
+        date = input('Preffered Date: ')
+        if not validate_input(date_regex, date):
+            print('Invalid date format.\nPlease supply date in one of the following formats:\ndd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy')
+        else:
+            print('\nSummary of choices: ')
+            print('-------------------')
+            print(f'Departure airport: {departure_airport}')
+            print(f'Arrival airport: {arrival_airport}')
+            print(f'Date: {date}')
+            print('-------------------')
+            confirm = input('Confirm? (y/n): \n')
+            if confirm == 'y':
+                # Send a request to airlines and list available flights
+                print('Available flights:\n')
+                break
+            else:
+                print('Booking cancelled\n')
+                break
 
-# Request user reference and last name to manage booking
+# Manage booking and helper methods
+
+
+def change_name():
+    new_name = input('Enter new name: ')
+    # TODO send new name to airline api
+    print(f'Name successfully changed to {new_name}!')
+
+
+def cancel_flight():
+    print('Cancelling flight...')
+
+
+def pay_by_card():
+    print('Card payment\n')
+
+
+def pay_with_klarna():
+    print('Klarna payment\n')
+
+
+def pay():
+    print('Please pick a payment method:\n')
+    payment_method = input(
+        '1. Card\n2. Klarna\n3. Go back\n4. Exit\nYour choice: ')
+    if payment_method == '1':
+        pay_by_card()
+    elif payment_method == '2':
+        pay_with_klarna()
+    elif payment_method == '3':
+        print('\nReturning to manage booking...\n')
+        manage_booking()
+    elif payment_method == '4':
+        exit()
+    else:
+        print('\nInvalid choice. Returning to manage booking...\n')
+        manage_booking()
+
+
+def view_booking():
+    print('Requesting booking details from airline...')
 
 
 def manage_booking():
-    print('Manage booking')
+    print('Manage booking\n')
+    while True:
+        booking_ref = input('\nEnter your booking reference: ')
+        if not validate_input(booking_ref_regex, booking_ref):
+            print('\nInvalid booking reference.Please check your details and try again.')
+        else:
+            last_name = input('\nEnter your last name: ')
+            # TODO check if booking exists and proceed to manage booking
+            user_choice = ''
+            while user_choice != '5':
+                user_choice = input(
+                    'Please choose an option:\n\n1. Change name\n2. Cancel flight\n3. Pay\n4. View Booking\n5. Back\n\nYour choice: ')
+                if user_choice == '1':
+                    change_name()
+                elif user_choice == '2':
+                    cancel_flight()
+                elif user_choice == '3':
+                    pay()
+                elif user_choice == '4':
+                    view_booking()
+                elif user_choice == '5':
+                    print('\nReturning to main menu...\n')
+                    break
+            break
 # Proces payment
 
 
 def process_payment():
     print("Processing payment...")
 
+# Exit function
+
+
+def exit():
+    print("Exiting...")
+    sys.exit(0)
 # Main method
 
 
@@ -67,13 +149,13 @@ def main():
     user_choice = ''
     while user_choice != '3':
         user_choice = input(
-            'Hello! Please choose an option: \n1. Book flight\n2. Manage booking\n3. Quit\nYour choice:')
+            'Hello! Please choose an option:\n\n1. Book flight\n2. Manage booking\n3. Quit\n\nYour choice: ')
         if user_choice == '1':
             search_flights()
         elif user_choice == '2':
             manage_booking()
         elif user_choice == '3':
-            print('Thank you for using our service!')
+            print('\nThank you for using our service!')
             break
 
 
