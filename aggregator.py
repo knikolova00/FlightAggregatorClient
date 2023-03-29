@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 import re
+import getpass
 
 # Available airlines and payment providers
 airline_apis = {}
@@ -63,8 +64,6 @@ def search_flights():
                 print('Booking cancelled\n')
                 break
 
-# Manage booking and helper methods
-
 
 def book_flight():
     print('Booking flight...')
@@ -95,6 +94,8 @@ def book_flight():
                     print('Booking cancelled\n')
                     break
 
+# Manage booking and helper methods
+
 
 def change_name():
     new_name = input('Enter new name: ')
@@ -105,13 +106,40 @@ def change_name():
 def cancel_flight():
     print('Cancelling flight...')
 
+# pay_by_card(amount)
+
 
 def pay_by_card():
     print('Card payment\n')
+    while True:
+        card_num = input('Card number: ')
+        if not validate_input(card_regex, card_num):
+            print('Invalid card number format. Please try again.')
+        else:
+            cvv = input('CVV: ')
+            if not validate_input(cvv_regex, cvv):
+                print('Invalid CVV format. Please try again.')
+            else:
+                expiry_date = input('Expiry date: ')
+                if not validate_input(date_regex, expiry_date):
+                    print('Invalid date format. Please try again.')
+                else:
+                    # TODO send a request to payment provider api
+                    print('Payment successful!\n')
+                    break
 
 
 def pay_with_klarna():
     print('Klarna payment\n')
+    while True:
+        email = input('Email: ')
+        if not validate_input(email_regex, email):
+            print('Invalid email format. Please try again.')
+        else:
+            password = getpass.getpass('Password: ')
+            # TODO send a request to payment provider api
+            print('Payment successful!\n')
+            break
 
 
 def process_payment():
