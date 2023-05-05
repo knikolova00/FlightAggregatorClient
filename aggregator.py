@@ -7,6 +7,7 @@ import getpass
 # Available airlines and payment providers
 airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api'}
 search_endpoint = '/searchFlight'
+book_endpoint = '/bookFlight'
 payment_provider_apis = {}
 
 # Sort by cheapest
@@ -36,13 +37,20 @@ booking_ref_regex = r'^[A-Z]{3}\d{4}$'
 def validate_input(type, data):
     return re.fullmatch(type, data)
 
-# Format data
+# Format date
 
 
 def format_date(date):
     day, month, year = re.split('/|-|\.', date)
     formatted_date = f'{year}-{month}-{day}'
     return formatted_date
+
+# Format Flight response
+
+
+def format_flights(response):
+    for flight in response.json():
+        print(f"Flight {flight['id']}: {flight['airline']} - Departing from {flight['departure_airport']} on {flight['date']} at {flight['departure_time']}. Arriving at {flight['arrival_airport']} at {flight['arrival_time']}. Duration: {flight['duration']} hours. Price: £{flight['price']}")
 
 # Get user preferences and request available flights from all airlines
 
@@ -53,7 +61,7 @@ def search_flights():
     arrival_airport = input('Arrival airport: ')
     # Continuosly check for valid date
     while True:
-        date = input('Preffered Date: ')
+        date = input('Prefered Date: ')
         if not validate_input(date_regex, date):
             print('Invalid date format.\nPlease supply date in one of the following formats:\ndd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy')
         else:
@@ -72,22 +80,30 @@ def search_flights():
                     search_url = url + search_endpoint
                     response = requests.get(search_url, params=params)
                     if response.status_code == 200:
-                        print(f'Available flights from {airline}:')
-                        flights = response.json()
-                        for flight in flights:
-                            print(flight)
+                        print('Available flights:\n')
+                        format_flights(response)
                         print('\n')
                     else:
                         print(f'Error: {response.status_code}')
-                print('Available flights:\n')
-                book_flight()
+                flight_id = input('Enter flight id to book: ')
+                for flight in response.json():
+                    if flight['id'] == int(flight_id):
+                        print(
+                            f"You have selected flight {flight_id} departing on {flight['date']}.\n")
+                        book_flight(
+                            flight['id'], flight['date'], flight['airline'])
+                        break
                 break
             else:
                 print('Booking cancelled\n')
                 break
 
 
-def book_flight():
+def book_flight(flight_id, date, airline):
+
+    # Get the airline api url
+    book_url = airline_apis[airline] + book_endpoint
+
     print('Booking flight...')
     first_name = input('First name: ')
     last_name = input('Last name: ')
@@ -109,9 +125,14 @@ def book_flight():
                 print('------------------------')
                 confirm = input('Confirm? (y/n): \n')
                 if confirm == 'y':
-                    # TODO send booking details to airline api
-                    print('Booking successful!\n')
-                    break
+                    params = {'flight_id': flight_id, 'date': date, 'first_name': first_name,
+                              'last_name': last_name, 'phone_no': phone_num, 'email': email}
+                    response = requests.post(book_url, params=params)
+                    if response.status_code == 200:
+                        print('Booking successful!\n')
+                    else:
+                        print(f'Error: {response.status_code}')
+                        exit()
                 else:
                     print('Booking cancelled\n')
                     break
