@@ -5,7 +5,8 @@ import re
 import getpass
 
 # Available airlines and payment providers
-airline_apis = {}
+airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api'}
+search_endpoint = '/searchFlight'
 payment_provider_apis = {}
 
 # Sort by cheapest
@@ -35,6 +36,14 @@ booking_ref_regex = r'^[A-Z]{3}\d{4}$'
 def validate_input(type, data):
     return re.fullmatch(type, data)
 
+# Format data
+
+
+def format_date(date):
+    day, month, year = re.split('/|-|\.', date)
+    formatted_date = f'{year}-{month}-{day}'
+    return formatted_date
+
 # Get user preferences and request available flights from all airlines
 
 
@@ -57,6 +66,19 @@ def search_flights():
             confirm = input('Confirm? (y/n): \n')
             if confirm == 'y':
                 # Send a request to airlines and list available flights
+                params = {'departure_location': departure_airport,
+                          'arrival_location': arrival_airport, 'departure_date': format_date(date)}
+                for airline, url in airline_apis.items():
+                    search_url = url + search_endpoint
+                    response = requests.get(search_url, params=params)
+                    if response.status_code == 200:
+                        print(f'Available flights from {airline}:')
+                        flights = response.json()
+                        for flight in flights:
+                            print(flight)
+                        print('\n')
+                    else:
+                        print(f'Error: {response.status_code}')
                 print('Available flights:\n')
                 book_flight()
                 break
