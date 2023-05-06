@@ -1,13 +1,16 @@
+# Built in modules
 import os
 import sys
+import getpass
+# Require installation - please check 'requirements.txt'
 import requests
 import re
-import getpass
+from reportlab.pdfgen import canvas
 
 # Available airlines and payment providers
 airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api'}
 search_endpoint = '/searchFlight'
-book_endpoint = '/bookFlight'
+book_endpoint = '/bookFlight/'
 payment_provider_apis = {}
 
 # Sort by cheapest
@@ -51,6 +54,44 @@ def format_date(date):
 def format_flights(response):
     for flight in response.json():
         print(f"Flight {flight['id']}: {flight['airline']} - Departing from {flight['departure_airport']} on {flight['date']} at {flight['departure_time']}. Arriving at {flight['arrival_airport']} at {flight['arrival_time']}. Duration: {flight['duration']} hours. Price: £{flight['price']}")
+
+# Format booking info and save to PDF
+
+
+def format_booking(booking):
+    print(f"Booking reference: {booking['reference_id']}")
+    print(f"Flight: {booking['flight_id']}")
+    print(f"Date: {booking['date']}")
+    print(f"First name: {booking['first_name']}")
+    print(f"Last name: {booking['last_name']}")
+    print(f"Phone number: {booking['phone_no']}")
+    print(f"Email: {booking['email']}")
+    print(f"Price: {booking['price']}")
+    print(f"Payment confirmed: {booking['confirmed']}")
+
+    # Create a new PDF file
+    file_name = f"{booking['last_name']}_{booking['reference_id']}.pdf"
+    pdf_file = canvas.Canvas(file_name)
+
+    # Set the font size and style
+    pdf_file.setFont('Helvetica', 12)
+
+    # Write the booking information to the PDF
+    pdf_file.drawString(
+        100, 750, f"Booking reference: {booking['reference_id']}")
+    pdf_file.drawString(100, 700, f"Flight: {booking['flight_id']}")
+    pdf_file.drawString(100, 650, f"Date: {booking['date']}")
+    pdf_file.drawString(100, 600, f"First name: {booking['first_name']}")
+    pdf_file.drawString(100, 550, f"Last name: {booking['last_name']}")
+    pdf_file.drawString(100, 500, f"Phone number: {booking['phone_no']}")
+    pdf_file.drawString(100, 450, f"Email: {booking['email']}")
+    pdf_file.drawString(100, 400, f"Price: {booking['price']}")
+    pdf_file.drawString(100, 350, f"Payment confirmed: {booking['confirmed']}")
+
+    # Save and close the PDF file
+    pdf_file.save()
+    print(f'Booking confirmation saved to {file_name}')
+
 
 # Get user preferences and request available flights from all airlines
 
@@ -103,18 +144,19 @@ def book_flight(flight_id, date, airline):
 
     # Get the airline api url
     book_url = airline_apis[airline] + book_endpoint
+    print(book_url)
 
     print('Booking flight...')
     first_name = input('First name: ')
     last_name = input('Last name: ')
     while True:
-        email = input('Email: ')
-        if not validate_input(email_regex, email):
-            print('Invalid email format. Please try again.')
+        phone_num = input('Phone number: ')
+        if not validate_input(phone_num_regex, phone_num):
+            print('Invalid phone number format. Please try again.')
         else:
-            phone_num = input('Phone number: ')
-            if not validate_input(phone_num_regex, phone_num):
-                print('Invalid phone number format. Please try again.')
+            email = input('Email: ')
+            if not validate_input(email_regex, email):
+                print('Invalid email format. Please try again.')
             else:
                 print('Booking details summary:')
                 print('------------------------')
@@ -127,11 +169,19 @@ def book_flight(flight_id, date, airline):
                 if confirm == 'y':
                     params = {'flight_id': flight_id, 'date': date, 'first_name': first_name,
                               'last_name': last_name, 'phone_no': phone_num, 'email': email}
-                    response = requests.post(book_url, params=params)
+                    headers = {'Content-Type': 'application/json'}
+                    response = requests.post(
+                        book_url, params=params, headers=headers)
+                    print('Request URL:', response.request.url)
+                    print('Request method:', response.request.method)
+                    print('Request headers:', response.request.headers)
+                    print('Request body:', response.request.body)
                     if response.status_code == 200:
                         print('Booking successful!\n')
+                        format_booking(response.json())
+                        break
                     else:
-                        print(f'Error: {response.status_code}')
+                        print(f'Error: {response.status_code}-{response.text}')
                         exit()
                 else:
                     print('Booking cancelled\n')
