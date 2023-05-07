@@ -11,6 +11,7 @@ from reportlab.pdfgen import canvas
 airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api'}
 search_endpoint = '/searchFlight'
 book_endpoint = '/bookFlight/'
+view_endpoint = '/getBooking/'
 payment_provider_apis = {}
 
 # Sort by cheapest
@@ -90,7 +91,9 @@ def format_booking(booking):
 
     # Save and close the PDF file
     pdf_file.save()
+    print('-------------------\n')
     print(f'Booking confirmation saved to {file_name}')
+    print('\n')
 
 
 # Get user preferences and request available flights from all airlines
@@ -253,10 +256,6 @@ def process_payment():
         manage_booking()
 
 
-def view_booking():
-    print('Requesting booking details from airline...')
-
-
 def manage_booking():
     print('Manage booking\n')
     while True:
@@ -265,22 +264,34 @@ def manage_booking():
             print('\nInvalid booking reference.Please check your details and try again.')
         else:
             last_name = input('\nEnter your last name: ')
+            airline = input('\nEnter the airline you booked with: ')
             # TODO check if booking exists and proceed to manage booking
-            user_choice = ''
-            while user_choice != '5':
-                user_choice = input(
-                    'Please choose an option:\n\n1. Change name\n2. Cancel flight\n3. Pay\n4. View Booking\n5. Back\n\nYour choice: ')
-                if user_choice == '1':
-                    change_name()
-                elif user_choice == '2':
-                    cancel_flight()
-                elif user_choice == '3':
-                    process_payment()
-                elif user_choice == '4':
-                    view_booking()
-                elif user_choice == '5':
-                    print('\nReturning to main menu...\n')
-                    break
+            params = {'reference_id': booking_ref, 'last_name': last_name}
+            check_endpoint = airline_apis[airline] + view_endpoint
+            response = requests.get(check_endpoint, params=params)
+            if response.status_code == 200:
+                user_choice = ''
+                while user_choice != '5':
+                    user_choice = input(
+                        'Please choose an option:\n\n1. Change name\n2. Cancel flight\n3. Pay\n4. View Booking\n5. Back\n\nYour choice: ')
+                    if user_choice == '1':
+                        change_name()
+                    elif user_choice == '2':
+                        cancel_flight()
+                    elif user_choice == '3':
+                        process_payment()
+                    elif user_choice == '4':
+                        print('\nBooking details summary:')
+                        print(
+                            '------------------------')
+                        format_booking(response.json())
+                    elif user_choice == '5':
+                        print('\nReturning to main menu...\n')
+                        break
+            else:
+                print(
+                    f'Error: {response.status_code}-{response.text}. Booking not found. Please try again.')
+                manage_booking()
             break
 
 # Exit function
