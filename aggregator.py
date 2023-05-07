@@ -195,15 +195,6 @@ def book_flight(flight_id, date, airline):
 # Manage booking and helper methods
 
 
-def change_name():
-    new_name = input('Enter new name: ')
-    # TODO send new name to airline api
-    print(f'Name successfully changed to {new_name}!')
-
-
-def cancel_flight():
-    print('Cancelling flight...')
-
 # pay_by_card(amount)
 
 
