@@ -12,6 +12,7 @@ airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api'}
 search_endpoint = '/searchFlight'
 book_endpoint = '/bookFlight/'
 view_endpoint = '/getBooking/'
+edit_endpoint = '/editBooking/'
 payment_provider_apis = {}
 
 # Sort by cheapest
@@ -265,7 +266,7 @@ def manage_booking():
         else:
             last_name = input('\nEnter your last name: ')
             airline = input('\nEnter the airline you booked with: ')
-            # TODO check if booking exists and proceed to manage booking
+            # Check if booking exists and proceed to manage booking
             params = {'reference_id': booking_ref, 'last_name': last_name}
             check_endpoint = airline_apis[airline] + view_endpoint
             response = requests.get(check_endpoint, params=params)
@@ -275,7 +276,20 @@ def manage_booking():
                     user_choice = input(
                         'Please choose an option:\n\n1. Change name\n2. Cancel flight\n3. Pay\n4. View Booking\n5. Back\n\nYour choice: ')
                     if user_choice == '1':
-                        change_name()
+                        new_first_name = input('Enter new first name: ')
+                        new_last_name = input('Enter new last name: ')
+                        change_params = {'reference_id': booking_ref, 'last_name': last_name,
+                                         'new_first_name': new_first_name, 'new_last_name': new_last_name}
+                        change_endpoint = airline_apis[airline] + edit_endpoint
+                        change_response = requests.put(
+                            change_endpoint, params=change_params)
+                        if change_response.status_code == 200:
+                            print(
+                                f'Name successfully changed to {new_first_name} {new_last_name}!')
+                        else:
+                            print(
+                                f'Error: {change_response.status_code}-{change_response.text}')
+                            exit()
                     elif user_choice == '2':
                         cancel_flight()
                     elif user_choice == '3':
