@@ -13,6 +13,7 @@ search_endpoint = '/searchFlight'
 book_endpoint = '/bookFlight/'
 view_endpoint = '/getBooking/'
 edit_endpoint = '/editBooking/'
+cancel_endpoint = '/cancelBooking/'
 payment_provider_apis = {}
 
 # Sort by cheapest
@@ -291,7 +292,23 @@ def manage_booking():
                                 f'Error: {change_response.status_code}-{change_response.text}')
                             exit()
                     elif user_choice == '2':
-                        cancel_flight()
+                        confirm = input(
+                            'Are you sure you want to cancel? (y/n): ')
+                        if confirm == 'y':
+                            cancel_flight_endpoint = airline_apis[airline] + \
+                                cancel_endpoint
+                            cancel_params = {
+                                'reference_id': booking_ref, 'last_name': last_name}
+                            cancel_response = requests.delete(
+                                cancel_flight_endpoint, params=cancel_params)
+                            if cancel_response.status_code == 200:
+                                print('Flight successfully cancelled!')
+                            else:
+                                print(
+                                    f'Error: {cancel_response.status_code}-{cancel_response.text}')
+                                exit()
+                        else:
+                            break
                     elif user_choice == '3':
                         process_payment()
                     elif user_choice == '4':
