@@ -24,9 +24,16 @@ associated with that number.
 Book a flight:
 
 1. Flight searching parameters: 
+
+Example1
 Departure Airport: Dubai
 Arrival Airport: Manchester
 Preferred Date: 15/05/2023
+
+Example2
+Departure Airport: London
+Arrival Airport: Singapore
+Preferred Date: 01/06/2023
 
 After entering these, you will be asked to confirm your choice. Please choose 'y' and press enter to continue.
 You will get a list of flights and a number associated with those. Please choose a number and press enter.
@@ -47,13 +54,27 @@ an email and a password. Once the details have been entered, you will either get
 For PaymentOne 
 
 Card Payment:
+
+PaymentOne:
 Card Number: 5105105105105100
 CVV: 789
 Expiry Date: 1030
 
+SwiftPay:
+Card Number: 2323232323232323
+CVV: 123
+Expiry Date: 0529
+
 Klarna payment(payment by email):
+
+PaymentOne:
 Email:test@test.com
 password: test (Note that the password is hidden when you type it in the terminal)
+
+SwiftPay:
+Email: shaji.febin@yahoo.com
+password: Febin123
+
 
 Manage Booking:
 

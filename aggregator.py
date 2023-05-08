@@ -13,7 +13,8 @@ airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api',
                 'ryanAir': 'http://sc20sbz.pythonanywhere.com/api'
                 }
 payment_provider_apis = {
-    'PaymentOne': 'https://tomschofield.pythonanywhere.com/pay'}
+    'PaymentOne': 'https://tomschofield.pythonanywhere.com/pay',
+    'SwiftPay': 'http://febins2.pythonanywhere.com/SwiftPay'}
 
 # Define endpoints
 search_endpoint = '/searchFlight/'
@@ -149,7 +150,12 @@ def search_flights():
                         else:
                             print(
                                 f'Error: {response.status_code} - {response.text}')
-                    format_flights(avail_flights)
+                    if len(avail_flights) == 0:
+                        print(
+                            'No flights available! Please choose a different date.\n')
+                        search_flights()
+                    else:
+                        format_flights(avail_flights)
                     flight_id = input('Enter flight id to book: ')
                     for flight in avail_flights:
                         if flight['id'] == int(flight_id):
@@ -200,9 +206,6 @@ def book_flight(flight_id, date, airline, price):
                         response = requests.post(
                             book_url, params=params, headers=headers)
                         print('Request URL:', response.request.url)
-                        print('Request method:', response.request.method)
-                        print('Request headers:', response.request.headers)
-                        print('Request body:', response.request.body)
                         if response.status_code == 200 or response.status_code == 201:
                             print('Booking successful!\n')
                             format_booking(response.json())
@@ -227,9 +230,6 @@ def book_flight(flight_id, date, airline, price):
 # Manage booking and helper methods
 
 
-# pay_by_card(amount)
-
-
 def pay_by_card(payment_api, amount, airline, reference_id):
     try:
         print('Card payment\n')
@@ -251,10 +251,11 @@ def pay_by_card(payment_api, amount, airline, reference_id):
                               'amount': amount}
                     response = requests.post(payment_link, json=params)
                     if response.status_code == 200:
-                        print(f'Paymento of £{amount} successful!\n')
+                        print(f'Payment of £{amount} successful!\n')
+                        # TODO remove debug print
                         print(response.json())
                         confirmation_params = {'reference_id': reference_id, 'payment_id': response.json()[
-                            'payment_id']}
+                            'paymentId']}
                         confirmation_response = requests.post(
                             airline_apis[airline] + confirm_endpoint, params=confirmation_params)
                         if confirmation_response.status_code == 200:
@@ -286,7 +287,7 @@ def pay_with_klarna(payment_api, amount, airline, reference_id):
                     print(f'Payment of £{amount} successful!\n')
                     print(response.json())
                     confirmation_params = {'reference_id': reference_id, 'payment_id': response.json()[
-                        'payment_id']}
+                        'paymentId']}
                     confirmation_response = requests.post(
                         airline_apis[airline] + confirm_endpoint, params=confirmation_params)
                     if confirmation_response.status_code == 200:
@@ -326,12 +327,12 @@ def choose_payment_provider(airline, price, reference_id):
     try:
         print('Please choose a payment provider:\n')
         payment_provider = input(
-            '1.PaymentOne\n2.PaymentTwo\n3.PaymentThree\n4.PaymentFour\n5.Exit\nYour choice: ')
+            '1.PaymentOne\n2.SwiftPay\n3.PaymentThree\n4.PaymentFour\n5.Exit\nYour choice: ')
         if payment_provider == '1':
             payment_api = payment_provider_apis['PaymentOne']
             process_payment(payment_api, price, airline, reference_id)
         elif payment_provider == '2':
-            payment_api = payment_provider_apis['PaymentTwo']
+            payment_api = payment_provider_apis['SwiftPay']
             process_payment(payment_api, price, airline, reference_id)
         elif payment_provider == '3':
             payment_api = payment_provider_apis['PaymentThree']
@@ -343,6 +344,8 @@ def choose_payment_provider(airline, price, reference_id):
             exit()
     except KeyboardInterrupt:
         print('\nExiting')
+
+# Manage booking functionality
 
 
 def manage_booking():
@@ -434,16 +437,19 @@ def exit():
 def main():
     print('Welcome to SkySavers!\n')
     user_choice = ''
-    while user_choice != '3':
-        user_choice = input(
-            'Please choose an option:\n\n1. Book flight\n2. Manage booking\n3. Quit\n\nYour choice: ')
-        if user_choice == '1':
-            search_flights()
-        elif user_choice == '2':
-            manage_booking()
-        elif user_choice == '3':
-            print('\nThank you for using our service!')
-            exit()
+    try:
+        while user_choice != '3':
+            user_choice = input(
+                'Please choose an option:\n\n1. Book flight\n2. Manage booking\n3. Quit\n\nYour choice: ')
+            if user_choice == '1':
+                search_flights()
+            elif user_choice == '2':
+                manage_booking()
+            elif user_choice == '3':
+                print('\nThank you for using our service!')
+                exit()
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 
 main()
