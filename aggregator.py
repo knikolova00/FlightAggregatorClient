@@ -2,28 +2,34 @@
 import os
 import sys
 import getpass
+import json
 # Require installation - please check 'requirements.txt'
 import requests
 import re
 from reportlab.pdfgen import canvas
 
 # Available airlines and payment providers
-airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api'}
-search_endpoint = '/searchFlight'
+airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api',
+                'ryanAir': 'http://sc20sbz.pythonanywhere.com/api'
+                }
+payment_provider_apis = {
+    'PaymentOne': 'https://tomschofield.pythonanywhere.com/pay'}
+
+# Define endpoints
+search_endpoint = '/searchFlight/'
 book_endpoint = '/bookFlight/'
 view_endpoint = '/getBooking/'
 edit_endpoint = '/editBooking/'
 cancel_endpoint = '/cancelBooking/'
-payment_provider_apis = {}
+confirm_endpoint = '/confirmPayment/'
 
-# Sort by cheapest
+pay_by_email_endpoint = '/payEmail/'
+pay_by_card_endpoint = '/payCard/'
+view_payment_endpoint = '/viewPay/'
+view_refund_endpoint = '/refund/'
 
-
-def sort_by_cheapest(flights):
-    return sorted(flights, key=lambda flight: flight['price'])
 
 # Define regular expressions
-
 
 email_regex = r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$'
 # Date in format dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy
@@ -51,12 +57,20 @@ def format_date(date):
     formatted_date = f'{year}-{month}-{day}'
     return formatted_date
 
+# Sort by cheapest flight
+
+
+def sort_by_cheapest(flights):
+    return sorted(flights, key=lambda flight: flight['price'], reverse=False)
+
 # Format Flight response
 
 
-def format_flights(response):
-    for flight in response.json():
+def format_flights(flights):
+    sorted_flights = sort_by_cheapest(flights)
+    for flight in sorted_flights:
         print(f"Flight {flight['id']}: {flight['airline']} - Departing from {flight['departure_airport']} on {flight['date']} at {flight['departure_time']}. Arriving at {flight['arrival_airport']} at {flight['arrival_time']}. Duration: {flight['duration']} hours. Price: £{flight['price']}")
+        print('\n')
 
 # Format booking info and save to PDF
 
@@ -69,8 +83,7 @@ def format_booking(booking):
     print(f"Last name: {booking['last_name']}")
     print(f"Phone number: {booking['phone_no']}")
     print(f"Email: {booking['email']}")
-    print(f"Price: {booking['price']}")
-    print(f"Payment confirmed: {booking['confirmed']}")
+    print(f"Price: £ {booking['price']}")
 
     # Create a new PDF file
     file_name = f"{booking['last_name']}_{booking['reference_id']}.pdf"
@@ -103,94 +116,113 @@ def format_booking(booking):
 
 def search_flights():
     print('Flight search')
-    departure_airport = input('Departure airport: ')
-    arrival_airport = input('Arrival airport: ')
-    # Continuosly check for valid date
-    while True:
-        date = input('Prefered Date: ')
-        if not validate_input(date_regex, date):
-            print('Invalid date format.\nPlease supply date in one of the following formats:\ndd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy')
-        else:
-            print('\nSummary of choices: ')
-            print('-------------------')
-            print(f'Departure airport: {departure_airport}')
-            print(f'Arrival airport: {arrival_airport}')
-            print(f'Date: {date}')
-            print('-------------------')
-            confirm = input('Confirm? (y/n): \n')
-            if confirm == 'y':
-                # Send a request to airlines and list available flights
-                params = {'departure_location': departure_airport,
-                          'arrival_location': arrival_airport, 'departure_date': format_date(date)}
-                for airline, url in airline_apis.items():
-                    search_url = url + search_endpoint
-                    response = requests.get(search_url, params=params)
-                    if response.status_code == 200:
-                        print('Available flights:\n')
-                        format_flights(response)
-                        print('\n')
-                    else:
-                        print(f'Error: {response.status_code}')
-                flight_id = input('Enter flight id to book: ')
-                for flight in response.json():
-                    if flight['id'] == int(flight_id):
-                        print(
-                            f"You have selected flight {flight_id} departing on {flight['date']}.\n")
-                        book_flight(
-                            flight['id'], flight['date'], flight['airline'])
-                        break
-                break
+    try:
+        departure_airport = input('Departure airport: ')
+        arrival_airport = input('Arrival airport: ')
+        # Continuosly check for valid date
+        while True:
+            date = input('Prefered Date(dd/mm/yyy, dd-mm-yyyy, dd.mm.yyyy): ')
+            if not validate_input(date_regex, date):
+                print(
+                    'Invalid date format.\nPlease supply date in one of the following formats:\ndd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy')
             else:
-                print('Booking cancelled\n')
-                break
+                print('\nSummary of choices: ')
+                print('-------------------')
+                print(f'Departure airport: {departure_airport}')
+                print(f'Arrival airport: {arrival_airport}')
+                print(f'Date: {date}')
+                print('-------------------')
+                confirm = input('Confirm? (y/n): \n')
+                if confirm == 'y':
+                    # Send a request to airlines and list available flights
+                    params = {'departure_location': departure_airport,
+                              'arrival_location': arrival_airport, 'departure_date': format_date(date)}
+                    print('Available flights:\n')
+                    avail_flights = []
+                    for airline, url in airline_apis.items():
+                        search_url = url + search_endpoint
+                        response = requests.get(search_url, params=params)
+                        if response.status_code == 200:
+                            flights = response.json()
+                            for flight in flights:
+                                avail_flights.append(flight)
+                        else:
+                            print(
+                                f'Error: {response.status_code} - {response.text}')
+                    format_flights(avail_flights)
+                    flight_id = input('Enter flight id to book: ')
+                    for flight in avail_flights:
+                        if flight['id'] == int(flight_id):
+                            print(
+                                f"You have selected flight {flight_id} departing on {flight['date']}.\n")
+                            book_flight(
+                                flight['id'], flight['date'], flight['airline'], flight['price'])
+                            break
+                    break
+                else:
+                    print('Booking cancelled\n')
+                    break
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 
-def book_flight(flight_id, date, airline):
+def book_flight(flight_id, date, airline, price):
 
     # Get the airline api url
     book_url = airline_apis[airline] + book_endpoint
     print(book_url)
 
     print('Booking flight...')
-    first_name = input('First name: ')
-    last_name = input('Last name: ')
-    while True:
-        phone_num = input('Phone number: ')
-        if not validate_input(phone_num_regex, phone_num):
-            print('Invalid phone number format. Please try again.')
-        else:
-            email = input('Email: ')
-            if not validate_input(email_regex, email):
-                print('Invalid email format. Please try again.')
+    try:
+        first_name = input('First name: ')
+        last_name = input('Last name: ')
+        while True:
+            phone_num = input('Phone number: ')
+            if not validate_input(phone_num_regex, phone_num):
+                print('Invalid phone number format. Please try again.')
             else:
-                print('Booking details summary:')
-                print('------------------------')
-                print(f'First name: {first_name}')
-                print(f'Last name: {last_name}')
-                print(f'Email: {email}')
-                print(f'Phone number: {phone_num}')
-                print('------------------------')
-                confirm = input('Confirm? (y/n): \n')
-                if confirm == 'y':
-                    params = {'flight_id': flight_id, 'date': date, 'first_name': first_name,
-                              'last_name': last_name, 'phone_no': phone_num, 'email': email}
-                    headers = {'Content-Type': 'application/json'}
-                    response = requests.post(
-                        book_url, params=params, headers=headers)
-                    print('Request URL:', response.request.url)
-                    print('Request method:', response.request.method)
-                    print('Request headers:', response.request.headers)
-                    print('Request body:', response.request.body)
-                    if response.status_code == 200:
-                        print('Booking successful!\n')
-                        format_booking(response.json())
-                        break
-                    else:
-                        print(f'Error: {response.status_code}-{response.text}')
-                        exit()
+                email = input('Email: ')
+                if not validate_input(email_regex, email):
+                    print('Invalid email format. Please try again.')
                 else:
-                    print('Booking cancelled\n')
-                    break
+                    print('Booking details summary:')
+                    print('------------------------')
+                    print(f'First name: {first_name}')
+                    print(f'Last name: {last_name}')
+                    print(f'Email: {email}')
+                    print(f'Phone number: {phone_num}')
+                    print('------------------------')
+                    confirm = input('Confirm? (y/n): \n')
+                    if confirm == 'y':
+                        params = {'flight_id': flight_id, 'date': date, 'first_name': first_name,
+                                  'last_name': last_name, 'phone_no': phone_num, 'email': email}
+                        headers = {'Content-Type': 'application/json'}
+                        response = requests.post(
+                            book_url, params=params, headers=headers)
+                        print('Request URL:', response.request.url)
+                        print('Request method:', response.request.method)
+                        print('Request headers:', response.request.headers)
+                        print('Request body:', response.request.body)
+                        if response.status_code == 200 or response.status_code == 201:
+                            print('Booking successful!\n')
+                            format_booking(response.json())
+                            payment = input("Continue to payment?(y/n): ")
+                            if payment == 'y':
+                                choose_payment_provider(
+                                    airline, price, response.json()['reference_id'])
+                            else:
+                                print(
+                                    'Payment cancelled. You can pay later via the Manage booking menu by supplying your booking reference and last name.\n')
+                                exit()
+                        else:
+                            print(
+                                f'Error: {response.status_code}-{response.text}')
+                            exit()
+                    else:
+                        print('Booking cancelled\n')
+                        break
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 # Manage booking and helper methods
 
@@ -198,123 +230,196 @@ def book_flight(flight_id, date, airline):
 # pay_by_card(amount)
 
 
-def pay_by_card():
-    print('Card payment\n')
-    while True:
-        card_num = input('Card number: ')
-        if not validate_input(card_regex, card_num):
-            print('Invalid card number format. Please try again.')
-        else:
-            cvv = input('CVV: ')
-            if not validate_input(cvv_regex, cvv):
-                print('Invalid CVV format. Please try again.')
+def pay_by_card(payment_api, amount, airline, reference_id):
+    try:
+        print('Card payment\n')
+        while True:
+            card_num = input('Card number: ')
+            if not validate_input(card_regex, card_num):
+                print('Invalid card number format. Please try again.')
             else:
-                expiry_date = input('Expiry date: ')
-                if not validate_input(date_regex, expiry_date):
-                    print('Invalid date format. Please try again.')
+                cvv = input('CVV: ')
+                if not validate_input(cvv_regex, cvv):
+                    print('Invalid CVV format. Please try again.')
                 else:
-                    # TODO send a request to payment provider api
-                    print('Payment successful!\n')
+                    expiry_date = input('Expiry date: ')
+                    # if not validate_input(date_regex, expiry_date):
+                    #     print('Invalid date format. Please try again.')
+                    # else:
+                    payment_link = payment_api + pay_by_card_endpoint
+                    params = {'card_num': card_num, 'CVV': cvv, 'expiry_date': expiry_date,
+                              'amount': amount}
+                    response = requests.post(payment_link, json=params)
+                    if response.status_code == 200:
+                        print(f'Paymento of £{amount} successful!\n')
+                        print(response.json())
+                        confirmation_params = {'reference_id': reference_id, 'payment_id': response.json()[
+                            'payment_id']}
+                        confirmation_response = requests.post(
+                            airline_apis[airline] + confirm_endpoint, params=confirmation_params)
+                        if confirmation_response.status_code == 200:
+                            print(f'Payment confirmed by {airline}!\n')
+                            exit()
+                        else:
+                            print(
+                                f'Error: {confirmation_response.status_code}-{confirmation_response.text}')
+                            exit()
+                        break
+    except KeyboardInterrupt:
+        print('\nExiting')
+
+
+def pay_with_klarna(payment_api, amount, airline, reference_id):
+    try:
+        print('Klarna payment\n')
+        while True:
+            email = input('Email: ')
+            if not validate_input(email_regex, email):
+                print('Invalid email format. Please try again.')
+            else:
+                password = getpass.getpass('Password: ')
+                payment_link = payment_api + pay_by_email_endpoint
+                params = {'email': email,
+                          'password': password, 'amount': amount}
+                response = requests.post(payment_link, json=params)
+                if response.status_code == 200:
+                    print(f'Payment of £{amount} successful!\n')
+                    print(response.json())
+                    confirmation_params = {'reference_id': reference_id, 'payment_id': response.json()[
+                        'payment_id']}
+                    confirmation_response = requests.post(
+                        airline_apis[airline] + confirm_endpoint, params=confirmation_params)
+                    if confirmation_response.status_code == 200:
+                        print(f'Payment confirmed by {airline}!\n')
+                        exit()
+                    else:
+                        print(
+                            f'Error: {confirmation_response.status_code}-{confirmation_response.text}')
+                        exit()
                     break
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 
-def pay_with_klarna():
-    print('Klarna payment\n')
-    while True:
-        email = input('Email: ')
-        if not validate_input(email_regex, email):
-            print('Invalid email format. Please try again.')
+def process_payment(payment_api, price, airline, reference_id):
+    try:
+        print('Please pick a payment method:\n')
+        payment_method = input(
+            '1. Card\n2. Klarna\n3. Go back\n4. Exit\nYour choice: ')
+        if payment_method == '1':
+            pay_by_card(payment_api, price, airline, reference_id)
+        elif payment_method == '2':
+            pay_with_klarna(payment_api, price, airline, reference_id)
+        elif payment_method == '3':
+            print('\nReturning to manage booking...\n')
+            manage_booking()
+        elif payment_method == '4':
+            exit()
         else:
-            password = getpass.getpass('Password: ')
-            # TODO send a request to payment provider api
-            print('Payment successful!\n')
-            break
+            print('\nInvalid choice. Returning to manage booking...\n')
+            manage_booking()
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 
-def process_payment():
-    print('Please pick a payment method:\n')
-    payment_method = input(
-        '1. Card\n2. Klarna\n3. Go back\n4. Exit\nYour choice: ')
-    if payment_method == '1':
-        pay_by_card()
-    elif payment_method == '2':
-        pay_with_klarna()
-    elif payment_method == '3':
-        print('\nReturning to manage booking...\n')
-        manage_booking()
-    elif payment_method == '4':
-        exit()
-    else:
-        print('\nInvalid choice. Returning to manage booking...\n')
-        manage_booking()
+def choose_payment_provider(airline, price, reference_id):
+    try:
+        print('Please choose a payment provider:\n')
+        payment_provider = input(
+            '1.PaymentOne\n2.PaymentTwo\n3.PaymentThree\n4.PaymentFour\n5.Exit\nYour choice: ')
+        if payment_provider == '1':
+            payment_api = payment_provider_apis['PaymentOne']
+            process_payment(payment_api, price, airline, reference_id)
+        elif payment_provider == '2':
+            payment_api = payment_provider_apis['PaymentTwo']
+            process_payment(payment_api, price, airline, reference_id)
+        elif payment_provider == '3':
+            payment_api = payment_provider_apis['PaymentThree']
+            process_payment(payment_api, price, airline, reference_id)
+        elif payment_provider == '4':
+            payment_api = payment_provider_apis['PaymentFour']
+            process_payment(payment_api, price, airline, reference_id)
+        else:
+            exit()
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 
 def manage_booking():
     print('Manage booking\n')
-    while True:
-        booking_ref = input('\nEnter your booking reference: ')
-        if not validate_input(booking_ref_regex, booking_ref):
-            print('\nInvalid booking reference.Please check your details and try again.')
-        else:
-            last_name = input('\nEnter your last name: ')
-            airline = input('\nEnter the airline you booked with: ')
-            # Check if booking exists and proceed to manage booking
-            params = {'reference_id': booking_ref, 'last_name': last_name}
-            check_endpoint = airline_apis[airline] + view_endpoint
-            response = requests.get(check_endpoint, params=params)
-            if response.status_code == 200:
-                user_choice = ''
-                while user_choice != '5':
-                    user_choice = input(
-                        'Please choose an option:\n\n1. Change name\n2. Cancel flight\n3. Pay\n4. View Booking\n5. Back\n\nYour choice: ')
-                    if user_choice == '1':
-                        new_first_name = input('Enter new first name: ')
-                        new_last_name = input('Enter new last name: ')
-                        change_params = {'reference_id': booking_ref, 'last_name': last_name,
-                                         'new_first_name': new_first_name, 'new_last_name': new_last_name}
-                        change_endpoint = airline_apis[airline] + edit_endpoint
-                        change_response = requests.put(
-                            change_endpoint, params=change_params)
-                        if change_response.status_code == 200:
-                            print(
-                                f'Name successfully changed to {new_first_name} {new_last_name}!')
-                        else:
-                            print(
-                                f'Error: {change_response.status_code}-{change_response.text}')
-                            exit()
-                    elif user_choice == '2':
-                        confirm = input(
-                            'Are you sure you want to cancel? (y/n): ')
-                        if confirm == 'y':
-                            cancel_flight_endpoint = airline_apis[airline] + \
-                                cancel_endpoint
-                            cancel_params = {
-                                'reference_id': booking_ref, 'last_name': last_name}
-                            cancel_response = requests.delete(
-                                cancel_flight_endpoint, params=cancel_params)
-                            if cancel_response.status_code == 200:
-                                print('Flight successfully cancelled!')
+    try:
+        while True:
+            booking_ref = input('\nEnter your booking reference: ')
+            if not validate_input(booking_ref_regex, booking_ref):
+                print(
+                    '\nInvalid booking reference.Please check your details and try again.')
+            else:
+                last_name = input('\nEnter your last name: ')
+                airline = input('\nEnter the airline you booked with: ')
+                # Check if booking exists and proceed to manage booking
+                params = {'reference_id': booking_ref, 'last_name': last_name}
+                check_endpoint = airline_apis[airline] + view_endpoint
+                response = requests.get(check_endpoint, params=params)
+                if response.status_code == 200:
+                    user_choice = ''
+                    while user_choice != '5':
+                        user_choice = input(
+                            'Please choose an option:\n\n1. Change name\n2. Cancel flight\n3. Pay\n4. View Booking\n5. Back\n\nYour choice: ')
+                        if user_choice == '1':
+                            new_first_name = input('Enter new first name: ')
+                            new_last_name = input('Enter new last name: ')
+                            change_params = {'reference_id': booking_ref, 'last_name': last_name,
+                                             'new_first_name': new_first_name, 'new_last_name': new_last_name}
+                            change_endpoint = airline_apis[airline] + \
+                                edit_endpoint
+                            change_response = requests.put(
+                                change_endpoint, params=change_params)
+                            if change_response.status_code == 200:
+                                print(
+                                    f'Name successfully changed to {new_first_name} {new_last_name}!')
+                                break
                             else:
                                 print(
-                                    f'Error: {cancel_response.status_code}-{cancel_response.text}')
+                                    f'Error: {change_response.status_code}-{change_response.text}')
                                 exit()
-                        else:
+                        elif user_choice == '2':
+                            confirm = input(
+                                'Are you sure you want to cancel? (y/n): ')
+                            if confirm == 'y':
+                                cancel_flight_endpoint = airline_apis[airline] + \
+                                    cancel_endpoint
+                                cancel_params = {
+                                    'reference_id': booking_ref, 'last_name': last_name}
+                                cancel_response = requests.delete(
+                                    cancel_flight_endpoint, params=cancel_params)
+                                if cancel_response.status_code == 200:
+                                    print('Flight successfully cancelled!')
+                                    break
+                                else:
+                                    print(
+                                        f'Error: {cancel_response.status_code}-{cancel_response.text}')
+                                    exit()
+                            else:
+                                break
+                        elif user_choice == '3':
+                            choose_payment_provider(
+                                airline, response.json()['price'], response.json()['reference_id'])
+                        elif user_choice == '4':
+                            print('\nBooking details summary:')
+                            print(
+                                '------------------------')
+                            format_booking(response.json())
                             break
-                    elif user_choice == '3':
-                        process_payment()
-                    elif user_choice == '4':
-                        print('\nBooking details summary:')
-                        print(
-                            '------------------------')
-                        format_booking(response.json())
-                    elif user_choice == '5':
-                        print('\nReturning to main menu...\n')
-                        break
-            else:
-                print(
-                    f'Error: {response.status_code}-{response.text}. Booking not found. Please try again.')
-                manage_booking()
-            break
+                        elif user_choice == '5':
+                            print('\nReturning to main menu...\n')
+                            break
+                else:
+                    print(
+                        f'Error: {response.status_code}-{response.text}. Booking not found. Please try again.')
+                    manage_booking()
+                break
+    except KeyboardInterrupt:
+        print('\nExiting')
 
 # Exit function
 
@@ -327,10 +432,11 @@ def exit():
 
 
 def main():
+    print('Welcome to SkySavers!\n')
     user_choice = ''
     while user_choice != '3':
         user_choice = input(
-            'Hello! Please choose an option:\n\n1. Book flight\n2. Manage booking\n3. Quit\n\nYour choice: ')
+            'Please choose an option:\n\n1. Book flight\n2. Manage booking\n3. Quit\n\nYour choice: ')
         if user_choice == '1':
             search_flights()
         elif user_choice == '2':
