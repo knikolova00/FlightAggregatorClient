@@ -12,6 +12,9 @@ They all need to be installed before running the application.
 This creates a new virtual environment which can be activated with ```.\venv\Scripts\activate``` on Windows
 and ```source <venv_directory>/bin/activate``` on Unix based operating systems.
 
+Other notes:
+- There is an example transcript of the application's usage in the file 'example_transcript.txt'.
+
 Usage:
 1. The application is started by running ```python aggregator.py``` in a terminal window.
 2. This should display a menu with three options - 1.Book a flight, 2. Manage Booking and 3.Quit.
@@ -34,6 +37,42 @@ Last Name: Your last name
 Email: follow the pattern 'ex@mail.com'
 Phone number: 11 digits, 07896781231
 
-You will be asked to confirm once more. On confirmation, a booking summary is displayed in the terminal and also saved as a pdf.
+You will be asked to confirm once more. On confirmation, a booking summary is displayed in the terminal and also saved as a pdf. 
+The pdf is saved in the same directory as the application. After that, you will be asked if you want to pay for the booking. You can
+choose 'y' or 'n'. If you choose 'y', you will be asked to choose a payment provider. Please enter a number and press enter. Then, you will be
+prompted to choose a payment method. If you choose '1', you will be asked to enter your card details. If you choose '2', you will be asked to enter
+an email and a password. Once the details have been entered, you will either get a confirmation message or an error message.
+
+3. Payment parameters:
+For PaymentOne 
+
+Card Payment:
+Card Number: 5105105105105100
+CVV: 789
+Expiry Date: 1030
+
+Klarna payment(payment by email):
+Email:test@test.com
+password: test (Note that the password is hidden when you type it in the terminal)
+
+Manage Booking:
+
+Required parameters:
+1. Booking reference: 3 letters and 4 digits, e.g. ABC1234 (Take a note when making a booking in order to use it here)
+2. Last Name: The name you used to make a booking
+3. Airline: The airline you booked with
+(All of these are also saved to the pdf document when you make a booking)
+
+1.Change Name:
+New First Name: Pick a new first name
+New Last Name: Pick a new last name
+You will get a confirmation once complete.
+2. Cancel Booking:
+You are asked to confirm and then you get a confirmation message.
+3. Pay:
+Check Book a flight from above for payment parameters.
+4. View Booking:
+Displays summary similar to when completing a booking via the Book flight option.
+
 
 
