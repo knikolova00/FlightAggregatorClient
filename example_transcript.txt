@@ -1,0 +1,226 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20230508131208
+Username: LAPTOP-F8F4RQH8\kalin
+RunAs User: LAPTOP-F8F4RQH8\kalin
+Configuration Name: 
+Machine: LAPTOP-F8F4RQH8 (Microsoft Windows NT 10.0.19044.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 4332
+PSVersion: 5.1.19041.2673
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.2673
+BuildVersion: 10.0.19041.2673
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Users\kalin\OneDrive\Камера\PowerShell_transcript.LAPTOP-F8F4RQH8.UzeUh3cV.20230508131208.txt
+PS C:\Users\kalin\Documents\FinalYear\Sem2\Web\Coursework2> python aggregator.py
+Welcome to SkySavers!
+
+Please choose an option:
+
+1. Book flight
+2. Manage booking
+3. Quit
+
+Your choice: 1
+Flight search
+Departure airport: London
+Arrival airport: Singapore
+Prefered Date(dd/mm/yyy, dd-mm-yyyy, dd.mm.yyyy): 01/06/2023
+
+Summary of choices:
+-------------------
+Departure airport: London
+Arrival airport: Singapore
+Date: 01/06/2023
+-------------------
+Confirm? (y/n):
+y
+Available flights:
+
+Flight 7: ryanAir - Departing from London GB LHR on 2023-06-01 at 20:05:10. Arriving at Singapore SG SIN at 08:05:10. Du
+ration: 14 hours. Price: £244
+
+
+Flight 269: Emirates - Departing from London Heathrow/LHR/UK on 2023-06-01 at 16:00:00. Arriving at Singapore Changi/SIN
+/Singapore at 23:00:00. Duration: 11 hours. Price: £600
+
+
+Enter flight id to book: 269
+You have selected flight 269 departing on 2023-06-01.
+
+https://sc20srn.pythonanywhere.com/emirates_api/bookFlight/
+Booking flight...
+First name: Kalina
+Last name: Nikolova
+Phone number: 06789123456
+Email: kn@mail.com
+Booking details summary:
+------------------------
+First name: Kalina
+Last name: Nikolova
+Email: kn@mail.com
+Phone number: 06789123456
+------------------------
+Confirm? (y/n):
+y
+Request URL: https://sc20srn.pythonanywhere.com/emirates_api/bookFlight/?flight_id=269&date=2023-06-01&first_name=Kalina
+&last_name=Nikolova&phone_no=06789123456&email=kn%40mail.com
+
+Booking successful!
+
+Booking reference: ZMF3598
+Flight: 269
+Date: 2023-06-01
+First name: Kalina
+Last name: Nikolova
+Phone number: 06789123456
+Email: kn@mail.com
+Price: £ 600
+-------------------
+
+Booking confirmation saved to Nikolova_ZMF3598.pdf
+
+
+Continue to payment?(y/n): y
+Please choose a payment provider:
+
+1.PaymentOne
+2.PaymentTwo
+3.PaymentThree
+4.PaymentFour
+5.Exit
+Your choice: 1
+Please pick a payment method:
+
+1. Card
+2. Klarna
+3. Go back
+4. Exit
+Your choice: 1
+Card payment
+
+Card number: 5105105105105100
+CVV: 789
+Expiry date: 1030
+Payment of £600 successful!
+
+{'status': 200, 'payment_id': 26, 'authenticated': True, 'message': 'payed successfully'}
+Payment confirmed by Emirates!
+
+Exiting...
+PS C:\Users\kalin\Documents\FinalYear\Sem2\Web\Coursework2> python aggregator.py
+Welcome to SkySavers!
+
+Please choose an option:
+
+1. Book flight
+2. Manage booking
+3. Quit
+
+Your choice: 2
+Manage booking
+
+
+Enter your booking reference: ZMF3598
+
+Enter your last name: Nikolova
+
+Enter the airline you booked with: Emirates
+Please choose an option:
+
+1. Change name
+2. Cancel flight
+3. Pay
+4. View Booking
+5. Back
+
+Your choice: 4
+
+Booking details summary:
+------------------------
+Booking reference: ZMF3598
+Flight: 269
+Date: 2023-06-01
+First name: Kalina
+Last name: Nikolova
+Phone number: 6789123456
+Email: kn@mail.com
+Price: £ 600
+-------------------
+
+Booking confirmation saved to Nikolova_ZMF3598.pdf
+
+
+Please choose an option:
+
+1. Book flight
+2. Manage booking
+3. Quit
+
+Your choice: 2
+Manage booking
+
+
+Enter your booking reference: ZMF3598
+
+Enter your last name: Nikolova
+
+Enter the airline you booked with: Emirates
+Please choose an option:
+
+1. Change name
+2. Cancel flight
+3. Pay
+4. View Booking
+5. Back
+
+Your choice: 1
+Enter new first name: Kalinaa
+Enter new last name: Georgieva
+Name successfully changed to Kalinaa Georgieva!
+Please choose an option:
+
+1. Book flight
+2. Manage booking
+3. Quit
+
+Your choice: 2
+Manage booking
+
+
+Enter your booking reference: ZMF3598
+
+Enter your last name: Georgieva
+
+Enter the airline you booked with: Emirates
+Please choose an option:
+
+1. Change name
+2. Cancel flight
+3. Pay
+4. View Booking
+5. Back
+
+Your choice: 2
+Are you sure you want to cancel? (y/n): y
+Flight successfully cancelled!
+Please choose an option:
+
+1. Book flight
+2. Manage booking
+3. Quit
+
+Your choice: 3
+
+Thank you for using our service!
+Exiting...
+PS C:\Users\kalin\Documents\FinalYear\Sem2\Web\Coursework2> Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20230508131743
+**********************
