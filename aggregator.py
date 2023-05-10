@@ -10,11 +10,15 @@ from reportlab.pdfgen import canvas
 
 # Available airlines and payment providers
 airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api',
-                'ryanAir': 'http://sc20sbz.pythonanywhere.com/api'
+                'ryanAir': 'http://sc20sbz.pythonanywhere.com/api',
+                'Aegean Airlines': 'http://sc19mkp.pythonanywhere.com',
+                'Lufthansa': 'http://ed18r22c.pythonanywhere.com/lufthansa_api',
                 }
 payment_provider_apis = {
-    'PaymentOne': 'https://tomschofield.pythonanywhere.com/pay',
-    'SwiftPay': 'http://febins2.pythonanywhere.com/SwiftPay'}
+    'EasyPay': 'https://ed19ts3.pythonanywhere.com/pay/',
+    'SwiftPay': 'http://ed192fs.pythonanywhere.com/pay/',
+    'PayWithShan': 'https://ed19sehd.pythonanywhere.com/polls'
+}
 
 # Define endpoints
 search_endpoint = '/searchFlight/'
@@ -68,10 +72,14 @@ def sort_by_cheapest(flights):
 
 
 def format_flights(flights):
-    sorted_flights = sort_by_cheapest(flights)
-    for flight in sorted_flights:
-        print(f"Flight {flight['id']}: {flight['airline']} - Departing from {flight['departure_airport']} on {flight['date']} at {flight['departure_time']}. Arriving at {flight['arrival_airport']} at {flight['arrival_time']}. Duration: {flight['duration']} hours. Price: £{flight['price']}")
-        print('\n')
+    try:
+        sorted_flights = sort_by_cheapest(flights)
+        for flight in sorted_flights:
+            print(f"Flight {flight['id']}: {flight['airline']} - Departing from {flight['departure_airport']} on {flight['date']} at {flight['departure_time']}. Arriving at {flight['arrival_airport']} at {flight['arrival_time']}. Duration: {flight['duration']} hours. Price: £{flight['price']}")
+            print('\n')
+    except Exception as e:
+        print('An error has occured.', e)
+        exit()
 
 # Format booking info and save to PDF
 
@@ -327,15 +335,15 @@ def choose_payment_provider(airline, price, reference_id):
     try:
         print('Please choose a payment provider:\n')
         payment_provider = input(
-            '1.PaymentOne\n2.SwiftPay\n3.PaymentThree\n4.PaymentFour\n5.Exit\nYour choice: ')
+            '1.EasyPay\n2.SwiftPay\n3.PayWithShan\n4.PaymentFour\n5.Exit\nYour choice: ')
         if payment_provider == '1':
-            payment_api = payment_provider_apis['PaymentOne']
+            payment_api = payment_provider_apis['EasyPay']
             process_payment(payment_api, price, airline, reference_id)
         elif payment_provider == '2':
             payment_api = payment_provider_apis['SwiftPay']
             process_payment(payment_api, price, airline, reference_id)
         elif payment_provider == '3':
-            payment_api = payment_provider_apis['PaymentThree']
+            payment_api = payment_provider_apis['PayWithShan']
             process_payment(payment_api, price, airline, reference_id)
         elif payment_provider == '4':
             payment_api = payment_provider_apis['PaymentFour']
