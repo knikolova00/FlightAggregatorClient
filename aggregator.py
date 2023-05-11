@@ -169,7 +169,7 @@ def search_flights():
                         format_flights(avail_flights)
                     flight_id = input('Enter flight id to book: ')
                     for flight in avail_flights:
-                        if flight['id'] == int(flight_id):
+                        if int(flight['id']) == int(flight_id):
                             print(
                                 f"You have selected flight {flight_id} departing on {flight['date']}.\n")
                             book_flight(
