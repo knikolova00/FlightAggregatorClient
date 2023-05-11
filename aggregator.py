@@ -11,13 +11,16 @@ from reportlab.pdfgen import canvas
 # Available airlines and payment providers
 airline_apis = {'Emirates': 'https://sc20srn.pythonanywhere.com/emirates_api',
                 'ryanAir': 'http://sc20sbz.pythonanywhere.com/api',
-                'Aegean Airlines': 'http://sc19mkp.pythonanywhere.com',
+                'Aegean Airlines': 'http://sc19mkp.pythonanywhere.com/aegean',
                 'Lufthansa': 'http://ed18r22c.pythonanywhere.com/lufthansa_api',
                 }
+
+#
 payment_provider_apis = {
     'EasyPay': 'https://ed19ts3.pythonanywhere.com/pay/',
     'SwiftPay': 'http://ed192fs.pythonanywhere.com/pay/',
-    'PayWithShan': 'https://ed19sehd.pythonanywhere.com/polls'
+    'PayWithShan': 'https://ed19sehd.pythonanywhere.com/polls',
+    'PayLink': 'https://sc20rmd.pythonanywhere.com/pay/'
 }
 
 # Define endpoints
@@ -66,7 +69,7 @@ def format_date(date):
 
 
 def sort_by_cheapest(flights):
-    return sorted(flights, key=lambda flight: flight['price'], reverse=False)
+    return sorted(flights, key=lambda flight: float(flight['price']), reverse=False)
 
 # Format Flight response
 
@@ -237,6 +240,8 @@ def book_flight(flight_id, date, airline, price):
 
 # Manage booking and helper methods
 
+# Card payment
+
 
 def pay_by_card(payment_api, amount, airline, reference_id):
     try:
@@ -251,16 +256,12 @@ def pay_by_card(payment_api, amount, airline, reference_id):
                     print('Invalid CVV format. Please try again.')
                 else:
                     expiry_date = input('Expiry date: ')
-                    # if not validate_input(date_regex, expiry_date):
-                    #     print('Invalid date format. Please try again.')
-                    # else:
                     payment_link = payment_api + pay_by_card_endpoint
                     params = {'card_num': card_num, 'CVV': cvv, 'expiry_date': expiry_date,
                               'amount': amount}
                     response = requests.post(payment_link, json=params)
-                    if response.status_code == 200:
+                    if response.status_code == 200 and response.json()['status'] == 200:
                         print(f'Payment of £{amount} successful!\n')
-                        # TODO remove debug print
                         print(response.json())
                         confirmation_params = {'reference_id': reference_id, 'payment_id': response.json()[
                             'paymentId']}
@@ -273,14 +274,18 @@ def pay_by_card(payment_api, amount, airline, reference_id):
                             print(
                                 f'Error: {confirmation_response.status_code}-{confirmation_response.text}')
                             exit()
-                        break
+                    else:
+                        print(
+                            f'Error: {response.status_code}-{response.text}')
+                        exit()
     except KeyboardInterrupt:
         print('\nExiting')
 
 
-def pay_with_klarna(payment_api, amount, airline, reference_id):
+# Payment by email and password
+def pay_by_email(payment_api, amount, airline, reference_id):
     try:
-        print('Klarna payment\n')
+        print('Email and password payment\n')
         while True:
             email = input('Email: ')
             if not validate_input(email_regex, email):
@@ -291,7 +296,7 @@ def pay_with_klarna(payment_api, amount, airline, reference_id):
                 params = {'email': email,
                           'password': password, 'amount': amount}
                 response = requests.post(payment_link, json=params)
-                if response.status_code == 200:
+                if response.status_code == 200 and response.json()['status'] == 200:
                     print(f'Payment of £{amount} successful!\n')
                     print(response.json())
                     confirmation_params = {'reference_id': reference_id, 'payment_id': response.json()[
@@ -305,20 +310,23 @@ def pay_with_klarna(payment_api, amount, airline, reference_id):
                         print(
                             f'Error: {confirmation_response.status_code}-{confirmation_response.text}')
                         exit()
-                    break
+                else:
+                    print(f'Error: {response.status_code}-{response.text}')
+                    exit()
     except KeyboardInterrupt:
         print('\nExiting')
 
 
+# Choosing payment method
 def process_payment(payment_api, price, airline, reference_id):
     try:
         print('Please pick a payment method:\n')
         payment_method = input(
-            '1. Card\n2. Klarna\n3. Go back\n4. Exit\nYour choice: ')
+            '1. Card\n2. Email and password payment\n3. Go back\n4. Exit\nYour choice: ')
         if payment_method == '1':
             pay_by_card(payment_api, price, airline, reference_id)
         elif payment_method == '2':
-            pay_with_klarna(payment_api, price, airline, reference_id)
+            pay_by_email(payment_api, price, airline, reference_id)
         elif payment_method == '3':
             print('\nReturning to manage booking...\n')
             manage_booking()
@@ -335,7 +343,7 @@ def choose_payment_provider(airline, price, reference_id):
     try:
         print('Please choose a payment provider:\n')
         payment_provider = input(
-            '1.EasyPay\n2.SwiftPay\n3.PayWithShan\n4.PaymentFour\n5.Exit\nYour choice: ')
+            '1.EasyPay\n2.SwiftPay\n3.PayWithShan\n4.PayLink\n5.Exit\nYour choice: ')
         if payment_provider == '1':
             payment_api = payment_provider_apis['EasyPay']
             process_payment(payment_api, price, airline, reference_id)
@@ -346,7 +354,7 @@ def choose_payment_provider(airline, price, reference_id):
             payment_api = payment_provider_apis['PayWithShan']
             process_payment(payment_api, price, airline, reference_id)
         elif payment_provider == '4':
-            payment_api = payment_provider_apis['PaymentFour']
+            payment_api = payment_provider_apis['PayLink']
             process_payment(payment_api, price, airline, reference_id)
         else:
             exit()
@@ -460,4 +468,8 @@ def main():
         print('\nExiting')
 
 
-main()
+if __name__ == '__main__':
+    main()
+
+
+# main()

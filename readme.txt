@@ -55,7 +55,7 @@ For PaymentOne
 
 Card Payment:
 
-PaymentOne:
+EasyPay:
 Card Number: 5105105105105100
 CVV: 789
 Expiry Date: 1030
@@ -65,7 +65,7 @@ Card Number: 2323232323232323
 CVV: 123
 Expiry Date: 0529
 
-Klarna payment(payment by email):
+Payment by email and password:
 
 PaymentOne:
 Email:test@test.com
