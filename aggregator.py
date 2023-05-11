@@ -187,7 +187,6 @@ def book_flight(flight_id, date, airline, price):
 
     # Get the airline api url
     book_url = airline_apis[airline] + book_endpoint
-    print(book_url)
 
     print('Booking flight...')
     try:
@@ -216,7 +215,6 @@ def book_flight(flight_id, date, airline, price):
                         headers = {'Content-Type': 'application/json'}
                         response = requests.post(
                             book_url, params=params, headers=headers)
-                        print('Request URL:', response.request.url)
                         if response.status_code == 200 or response.status_code == 201:
                             print('Booking successful!\n')
                             format_booking(response.json())

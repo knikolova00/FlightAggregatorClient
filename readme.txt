@@ -6,8 +6,9 @@ flight booking and payment capabilities.
 
 Pre-requisites:
 - There is a 'requirements.txt' file which contains all external libraries which are used by the client.
-They all need to be installed before running the application. 
-- Run ```pip install requirement.txt``` to install the required packages.
+They all need to be installed before running the application. Please note that the solution has been testes on the
+school machines which run a python version <3.7. If testing on these, please install requirements_lab_machines.txt instead.
+- Run ```pip install -r requirement.txt``` to install the required packages.
 - If you prefer to install these in a virtual environment, firstly run ```python3 -m venv <name_of_venv>```.
 This creates a new virtual environment which can be activated with ```.\venv\Scripts\activate``` on Windows
 and ```source <venv_directory>/bin/activate``` on Unix based operating systems.
