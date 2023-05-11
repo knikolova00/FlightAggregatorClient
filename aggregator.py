@@ -33,8 +33,6 @@ confirm_endpoint = '/confirmPayment/'
 
 pay_by_email_endpoint = '/payEmail/'
 pay_by_card_endpoint = '/payCard/'
-view_payment_endpoint = '/viewPay/'
-view_refund_endpoint = '/refund/'
 
 
 # Define regular expressions
@@ -181,6 +179,8 @@ def search_flights():
                     break
     except KeyboardInterrupt:
         print('\nExiting')
+
+# Booking a flight
 
 
 def book_flight(flight_id, date, airline, price):
@@ -336,6 +336,8 @@ def process_payment(payment_api, price, airline, reference_id):
     except KeyboardInterrupt:
         print('\nExiting')
 
+# Choosing payment provider
+
 
 def choose_payment_provider(airline, price, reference_id):
     try:
@@ -468,6 +470,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-# main()

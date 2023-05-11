@@ -31,7 +31,7 @@ Departure Airport: Dubai
 Arrival Airport: Manchester
 Preferred Date: 15/05/2023
 
-Example2
+Example2 (generates flights from 3 airlines)
 Departure Airport: London
 Arrival Airport: Singapore
 Preferred Date: 01/06/2023
@@ -96,5 +96,8 @@ Check Book a flight from above for payment parameters.
 4. View Booking:
 Displays summary similar to when completing a booking via the Book flight option.
 
+Note: Thorough testing has been done with the web services mentioned here. Endpoints for 4/5 airlines and 4/4 payment providers
+are also included in the code. Not all payment providers have been tested with all airlines due to insufficient time. They will work
+as expected only if the appropriate naming and formatting conventions have been followed.
 
 
