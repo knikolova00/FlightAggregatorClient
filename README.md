@@ -10,7 +10,7 @@ The application has been designed to allow communication between web services pr
 flight booking and payment capabilities.
 
 ## Pre-requisites:
-- There is a ```requirements.txt`` file which contains all external libraries which are used by the client.
+- There is a ```requirements.txt``` file which contains all external libraries which are used by the client.
 They all need to be installed before running the application. Please note that the solution has been testes on the
 school machines which run a python version <3.7. If testing on these, please install ```requirements_lab_machines.txt``` instead.
 - Run ```pip install -r requirement.txt``` to install the required packages.
@@ -29,7 +29,7 @@ associated with that number.
 
 ### Book a flight:
 
-1. Flight searching parameters: 
+#### Flight searching parameters: 
 
 Example 1
 Departure Airport: Dubai
@@ -44,7 +44,7 @@ Preferred Date: 01/06/2023
 After entering these, you will be asked to confirm your choice. Please choose 'y' and press enter to continue.
 You will get a list of flights and a number associated with those. Please choose a number and press enter.
 
-2. User data parameters:
+#### User data parameters:
 First Name: Your first name
 Last Name: Your last name
 Email: follow the pattern 'ex@mail.com'
@@ -56,7 +56,8 @@ choose 'y' or 'n'. If you choose 'y', you will be asked to choose a payment prov
 prompted to choose a payment method. If you choose '1', you will be asked to enter your card details. If you choose '2', you will be asked to enter
 an email and a password. Once the details have been entered, you will either get a confirmation message or an error message.
 
-3. Payment parameters:
+#### Payment parameters:
+
 For PaymentOne 
 
 Card Payment:
@@ -84,12 +85,13 @@ password: Febin123
 
 ### Manage Booking:
 
-Required parameters:
+#### Required parameters:
 1. Booking reference: 3 letters and 4 digits, e.g. ABC1234 (Take a note when making a booking in order to use it here)
 2. Last Name: The name you used to make a booking
 3. Airline: The airline you booked with
 (All of these are also saved to the pdf document when you make a booking)
 
+#### Available features: 
 1. Change Name:
 New First Name: Pick a new first name
 New Last Name: Pick a new last name
