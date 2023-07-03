@@ -1,92 +1,103 @@
-# WebServices-Coursework2
+# Flight aggregator client
+## Kalina Nikolova, 2023
+**Developed as part of the Web Services and Web Data COMP module at the University of Leeds, taught by Dr Mohammad Ammar Alsalka.**
 
 
+This file contains instructions for using aggregator.py created by Kalina Nikolova
+for COMP3011 Web Services and Web Data, Coursework 2, 2023.
 
-## Getting started
+The application has been designed to allow communication between web services providing
+flight booking and payment capabilities.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Pre-requisites:
+- There is a ```requirements.txt`` file which contains all external libraries which are used by the client.
+They all need to be installed before running the application. Please note that the solution has been testes on the
+school machines which run a python version <3.7. If testing on these, please install ```requirements_lab_machines.txt``` instead.
+- Run ```pip install -r requirement.txt``` to install the required packages.
+- If you prefer to install these in a virtual environment, firstly run ```python3 -m venv <name_of_venv>```.
+This creates a new virtual environment which can be activated with ```.\venv\Scripts\activate``` on Windows
+and ```source <venv_directory>/bin/activate``` on Unix based operating systems.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Other notes:
+- There is an example transcript of the application's usage in the file ```example_transcript.txt```.
 
-## Add your files
+## Usage:
+1. The application is started by running ```python aggregator.py``` in a terminal window.
+2. This should display a menu with three options - 1.Book a flight, 2. Manage Booking and 3.Quit.
+3. Supplying a number '1', '2' or '3' and pressing 'Enter' results in the invocation of the service
+associated with that number.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+### Book a flight:
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/comp3931-final-project/webservices-coursework2.git
-git branch -M main
-git push -uf origin main
-```
+1. Flight searching parameters: 
 
-## Integrate with your tools
+Example 1
+Departure Airport: Dubai
+Arrival Airport: Manchester
+Preferred Date: 15/05/2023
 
-- [ ] [Set up project integrations](https://gitlab.com/comp3931-final-project/webservices-coursework2/-/settings/integrations)
+Example 2 (generates flights from 3 airlines)
+Departure Airport: London
+Arrival Airport: Singapore
+Preferred Date: 01/06/2023
 
-## Collaborate with your team
+After entering these, you will be asked to confirm your choice. Please choose 'y' and press enter to continue.
+You will get a list of flights and a number associated with those. Please choose a number and press enter.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+2. User data parameters:
+First Name: Your first name
+Last Name: Your last name
+Email: follow the pattern 'ex@mail.com'
+Phone number: 11 digits, 07896781231
 
-## Test and Deploy
+You will be asked to confirm once more. On confirmation, a booking summary is displayed in the terminal and also saved as a pdf. 
+The pdf is saved in the same directory as the application. After that, you will be asked if you want to pay for the booking. You can
+choose 'y' or 'n'. If you choose 'y', you will be asked to choose a payment provider. Please enter a number and press enter. Then, you will be
+prompted to choose a payment method. If you choose '1', you will be asked to enter your card details. If you choose '2', you will be asked to enter
+an email and a password. Once the details have been entered, you will either get a confirmation message or an error message.
 
-Use the built-in continuous integration in GitLab.
+3. Payment parameters:
+For PaymentOne 
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Card Payment:
 
-***
+EasyPay:
+Card Number: 5105105105105100
+CVV: 789
+Expiry Date: 1030
 
-# Editing this README
+SwiftPay:
+Card Number: 2323232323232323
+CVV: 123
+Expiry Date: 0529
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Payment by email and password:
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+PaymentOne:
+Email:test@test.com
+password: test (Note that the password is hidden when you type it in the terminal)
 
-## Name
-Choose a self-explaining name for your project.
+SwiftPay:
+Email: shaji.febin@yahoo.com
+password: Febin123
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Manage Booking:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Required parameters:
+1. Booking reference: 3 letters and 4 digits, e.g. ABC1234 (Take a note when making a booking in order to use it here)
+2. Last Name: The name you used to make a booking
+3. Airline: The airline you booked with
+(All of these are also saved to the pdf document when you make a booking)
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+1. Change Name:
+New First Name: Pick a new first name
+New Last Name: Pick a new last name
+You will get a confirmation once complete.
+2. Cancel Booking:
+You are asked to confirm and then you get a confirmation message.
+3. Pay:
+Check Book a flight from above for payment parameters.
+4. View Booking:
+Displays summary similar to when completing a booking via the Book flight option.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
